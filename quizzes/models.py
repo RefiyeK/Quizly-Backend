@@ -32,7 +32,7 @@ class Question(models.Model):
     )
     question_title = models.CharField(max_length=500)
     question_options = models.JSONField()
-    answer = models.CharField(max_length=200)
+    answer = models.CharField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
