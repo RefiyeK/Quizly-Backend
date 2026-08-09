@@ -5,7 +5,7 @@ class CookieJWTAuthentication(JWTAuthentication):
     """Liest den Access-Token aus dem HttpOnly-Cookie statt aus dem Header."""
 
     def authenticate(self, request):
-        """Holt den Token aus dem Cookie und validiert ihn."""
+        """Holt den Access-Token aus dem Cookie und validiert ihn."""
         access_token = request.COOKIES.get('access_token')
         if not access_token:
             return None

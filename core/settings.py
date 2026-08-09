@@ -169,4 +169,4 @@ SIMPLE_JWT = {
 # Cookie-Sicherheitseinstellungen (werden in Phase 4 in den Views verwendet)
 COOKIE_HTTPONLY = True
 COOKIE_SECURE = False
-COOKIE_SAMESITE = 'None'
+COOKIE_SAMESITE = 'Lax'  # Kann auf 'Strict' oder 'None' gesetzt werden, je nach Bedarf
