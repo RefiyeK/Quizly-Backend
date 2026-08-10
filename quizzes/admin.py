@@ -4,19 +4,19 @@ from .models import Quiz, Question
 
 
 class QuestionInline(admin.TabularInline):
-    """Zeigt Fragen direkt im Quiz-Formular an."""
+    """Shows questions directly in the quiz form."""
     model = Question
-    extra = 1
+    extra = 0
 
 
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
-    """Admin-Konfiguration für Quizze mit eingebetteten Fragen."""
+    """Admin configuration for quizzes with embedded questions."""
     list_display = ['id', 'title', 'owner', 'created_at']
     inlines = [QuestionInline]
 
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    """Admin-Konfiguration für einzelne Fragen."""
+    """Admin configuration for individual questions."""
     list_display = ['id', 'question_title', 'quiz']

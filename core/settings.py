@@ -18,8 +18,8 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# .env-Datei laden (enthält Secrets wie SECRET_KEY, später GEMINI_API_KEY).
-# Muss vor dem ersten Zugriff auf os.environ passieren.
+# Load the .env file (contains secrets like SECRET_KEY and GEMINI_API_KEY).
+# Must run before the first access to os.environ.
 load_dotenv(BASE_DIR / ".env")
 
 
@@ -27,7 +27,7 @@ load_dotenv(BASE_DIR / ".env")
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# Wird aus der .env-Datei geladen (siehe .env.template).
+# Loaded from the .env file (see .env.template).
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -140,7 +140,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# CORS-Konfiguration
+# CORS configuration
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5500',
     'http://localhost:5500',
@@ -149,7 +149,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 
-# Django REST Framework Konfiguration
+# Django REST Framework configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'authentication.authentication.CookieJWTAuthentication',
@@ -166,7 +166,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-# Cookie-Sicherheitseinstellungen (werden in Phase 4 in den Views verwendet)
+# Cookie security settings (used in the authentication views)
 COOKIE_HTTPONLY = True
 COOKIE_SECURE = False
-COOKIE_SAMESITE = 'Lax'  # Kann auf 'Strict' oder 'None' gesetzt werden, je nach Bedarf
+COOKIE_SAMESITE = 'Lax'  # Can be set to 'Strict' or 'None' depending on needs

@@ -7,30 +7,30 @@ User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    """Serializer für die Registrierung eines neuen Benutzers.
-    Validiert die Eingabedaten und erstellt einen neuen Benutzer.
+    """Serializer for registering a new user.
+    Validates the input data and creates a new user.
     """
 
     confirmed_password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        """Prüft, ob beide Passwörter übereinstimmen."""
+        """Check whether both passwords match."""
         if data['password'] != data['confirmed_password']:
             raise serializers.ValidationError(
-                "Die Passwörter stimmen nicht überein."
+                "The passwords do not match."
             )
         return data
 
     def validate_email(self, value):
-        """Prüft, ob die E-Mail bereits registriert ist."""
+        """Check whether the email is already registered."""
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError(
-                "Diese E-Mail wird bereits verwendet."
+                "This email is already in use."
             )
         return value
 
     def create(self, validated_data):
-        """Erstellt einen neuen Benutzer mit gehashtem Passwort."""
+        """Create a new user with a hashed password."""
         validated_data.pop('confirmed_password', None)
         user = User.objects.create_user(
             username=validated_data['username'],
@@ -48,10 +48,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(TokenObtainPairSerializer):
-    """Serializer für den Login. Validiert Zugangsdaten und ergänzt Nutzerdaten."""
+    """Serializer for login. Validates credentials and adds user data."""
 
     def validate(self, attrs):
-        """Prüft die Zugangsdaten und ergänzt die Nutzerdaten."""
+        """Validate the credentials and add the user data."""
         data = super().validate(attrs)
         data['user'] = {
             'id': self.user.id,

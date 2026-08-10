@@ -10,11 +10,11 @@ from .serializers import RegisterSerializer, LoginSerializer
 
 
 class RegisterView(APIView):
-    """View für die Registrierung eines neuen Benutzers."""
+    """View for registering a new user."""
     permission_classes = [AllowAny]
 
     def post(self, request):
-        """Validiert die Daten und erstellt einen neuen Benutzer."""
+        """Validate the data and create a new user."""
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -25,11 +25,11 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
-    """View für den Login. Setzt Tokens als HttpOnly-Cookies."""
+    """View for login. Sets tokens as HttpOnly cookies."""
     permission_classes = [AllowAny]
 
     def post(self, request):
-        """Validiert Zugangsdaten und setzt Auth-Cookies."""
+        """Validate credentials and set auth cookies."""
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -42,7 +42,7 @@ class LoginView(APIView):
         return response
 
     def _set_auth_cookies(self, response, access, refresh):
-        """Schreibt Access- und Refresh-Token als HttpOnly-Cookies."""
+        """Write the access and refresh tokens as HttpOnly cookies."""
         response.set_cookie(
             key='access_token',
             value=str(access),
@@ -60,11 +60,11 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
-    """View für den Logout. Blacklistet den Refresh-Token und löscht Cookies."""
+    """View for logout. Blacklists the refresh token and deletes cookies."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        """Macht den Refresh-Token ungültig und entfernt die Auth-Cookies."""
+        """Invalidate the refresh token and remove the auth cookies."""
         refresh_token = request.COOKIES.get('refresh_token')
         if refresh_token:
             try:
@@ -84,11 +84,11 @@ class LogoutView(APIView):
 
 
 class CookieTokenRefreshView(APIView):
-    """View für den Token-Refresh. Liest den Refresh-Token aus dem Cookie."""
+    """View for token refresh. Reads the refresh token from the cookie."""
     permission_classes = [AllowAny]
 
     def post(self, request):
-        """Erzeugt einen neuen Access-Token aus dem Refresh-Cookie."""
+        """Create a new access token from the refresh cookie."""
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
             return Response(

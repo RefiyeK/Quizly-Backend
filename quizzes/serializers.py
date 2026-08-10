@@ -4,7 +4,7 @@ from .models import Quiz, Question
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    """Serializer für eine einzelne Frage eines Quiz."""
+    """Serializer for a single question of a quiz."""
 
     class Meta:
         model = Question
@@ -12,7 +12,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class QuizSerializer(serializers.ModelSerializer):
-    """Serializer für ein Quiz inklusive verschachtelter Fragen."""
+    """Serializer for a quiz including nested questions."""
     questions = QuestionSerializer(many=True, read_only=True)
 
     class Meta:
@@ -21,4 +21,5 @@ class QuizSerializer(serializers.ModelSerializer):
             'id', 'title', 'description',
             'created_at', 'updated_at', 'video_url', 'questions',
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'video_url', 'questions']
+        read_only_fields = ['id', 'created_at',
+                            'updated_at', 'video_url', 'questions']

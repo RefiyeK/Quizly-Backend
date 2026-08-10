@@ -11,7 +11,7 @@ from google import genai
 
 
 def download_audio(url):
-    """Lädt das Audio eines YouTube-Videos herunter und gibt den Dateipfad zurück."""
+    """Download the audio of a YouTube video and return the file path."""
     temp_dir = tempfile.gettempdir()
     filename = os.path.join(temp_dir, f"{uuid.uuid4()}.mp3")
 
@@ -29,14 +29,14 @@ def download_audio(url):
 
 
 def transcribe_audio(audio_path):
-    """Transkribiert eine Audiodatei mit Whisper und gibt den Text zurück."""
+    """Transcribe an audio file with Whisper and return the text."""
     model = whisper.load_model("base")
     result = model.transcribe(audio_path)
     return result["text"]
 
 
 def generate_quiz_from_transcript(transcript):
-    """Erzeugt aus einem Transkript ein Quiz im JSON-Format mit Gemini."""
+    """Generate a quiz in JSON format from a transcript using Gemini."""
     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
     prompt = _build_prompt(transcript)
 
@@ -48,7 +48,7 @@ def generate_quiz_from_transcript(transcript):
 
 
 def _build_prompt(transcript):
-    """Baut den Prompt für die Quiz-Generierung aus dem Transkript."""
+    """Build the prompt for quiz generation from the transcript."""
     return (
         "Based on the following transcript, generate a quiz in valid JSON "
         "format. The quiz must follow this exact structure:\n"
@@ -68,7 +68,7 @@ def _build_prompt(transcript):
 
 
 def _parse_quiz_json(raw_text):
-    """Bereinigt die KI-Antwort und parst sie als JSON."""
+    """Clean the AI response and parse it as JSON."""
     cleaned = raw_text.strip()
     if cleaned.startswith("```"):
         cleaned = cleaned.split("```")[1]
@@ -78,15 +78,18 @@ def _parse_quiz_json(raw_text):
 
 
 def create_quiz_from_url(url, user):
-    """Führt die komplette Pipeline aus und speichert das Quiz für den Benutzer."""
+    """Run the complete pipeline and save the quiz for the user."""
     audio_path = download_audio(url)
-    transcript = transcribe_audio(audio_path)
-    quiz_data = generate_quiz_from_transcript(transcript)
-    return _save_quiz(quiz_data, url, user)
+    try:
+        transcript = transcribe_audio(audio_path)
+        quiz_data = generate_quiz_from_transcript(transcript)
+        return _save_quiz(quiz_data, url, user)
+    finally:
+        _cleanup_file(audio_path)
 
 
 def _save_quiz(quiz_data, url, user):
-    """Speichert Quiz und Fragen in der Datenbank."""
+    """Save the quiz and its questions to the database."""
     quiz = Quiz.objects.create(
         owner=user,
         title=quiz_data["title"],
@@ -104,8 +107,14 @@ def _save_quiz(quiz_data, url, user):
 
 
 def _normalize_youtube_url(url):
-    """Extrahiert die Video-ID und baut die kanonische YouTube-URL."""
+    """Extract the video ID and build the canonical YouTube URL."""
     match = re.search(r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{11})", url)
     if match:
         return f"https://www.youtube.com/watch?v={match.group(1)}"
     return url
+
+
+def _cleanup_file(path):
+    """Delete the temporary audio file if it exists."""
+    if path and os.path.exists(path):
+        os.remove(path)

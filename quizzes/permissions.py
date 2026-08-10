@@ -2,8 +2,8 @@ from rest_framework.permissions import BasePermission
 
 
 class IsOwner(BasePermission):
-    """Erlaubt Zugriff nur dem Besitzer des Quiz."""
+    """Allows access only to the owner of the quiz."""
 
     def has_object_permission(self, request, view, obj):
-        """Prüft, ob das Objekt dem aktuellen Benutzer gehört."""
+        """Check whether the object belongs to the current user."""
         return obj.owner == request.user
