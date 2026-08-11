@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Quiz
-from .serializers import QuizSerializer
+from .serializers import QuizSerializer, QuizCreateSerializer
 from .permissions import IsOwner
 from .services import create_quiz_from_url
 
@@ -32,7 +32,7 @@ class QuizListCreateView(generics.ListCreateAPIView):
                 {"detail": "Quiz could not be generated from the given URL."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        serializer = self.get_serializer(quiz)
+        serializer = QuizCreateSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
