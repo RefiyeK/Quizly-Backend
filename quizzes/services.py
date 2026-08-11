@@ -92,21 +92,29 @@ def create_quiz_from_url(url, user):
 
 
 def _save_quiz(quiz_data, url, user):
-    """Save the quiz and its questions to the database."""
+    """Validate the AI data and save the quiz with its questions."""
+    questions = quiz_data.get("questions", [])
+    if len(questions) != 10:
+        raise ValueError("Quiz must contain exactly 10 questions.")
     quiz = Quiz.objects.create(
         owner=user,
         title=quiz_data["title"],
         description=quiz_data["description"],
         video_url=_normalize_youtube_url(url),
     )
-    for question in quiz_data["questions"]:
+    _create_questions(quiz, questions)
+    return quiz
+
+
+def _create_questions(quiz, questions):
+    """Create all question rows for a given quiz."""
+    for question in questions:
         Question.objects.create(
             quiz=quiz,
             question_title=question["question_title"],
             question_options=question["question_options"],
             answer=question["answer"],
         )
-    return quiz
 
 
 def _normalize_youtube_url(url):
