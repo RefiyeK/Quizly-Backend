@@ -12,6 +12,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     """
 
     confirmed_password = serializers.CharField(write_only=True)
+    email = serializers.EmailField(required=True)
 
     def validate(self, data):
         """Check whether both passwords match."""

@@ -10,6 +10,24 @@ import whisper
 from google import genai
 
 
+_QUIZ_PROMPT_TEMPLATE = (
+    "Based on the following transcript, generate a quiz in valid JSON "
+    "format. The quiz must follow this exact structure:\n"
+    '{"title": "A concise quiz title based on the transcript topic.", '
+    '"description": "Summarize the transcript in max 150 characters. '
+    'No quiz questions or answers.", '
+    '"questions": [{"question_title": "The question.", '
+    '"question_options": ["Option A", "Option B", "Option C", "Option D"], '
+    '"answer": "The correct option, exactly matching one of the options"}]}\n'
+    "Requirements:\n"
+    "- Exactly 10 questions.\n"
+    "- Each question has exactly 4 distinct options.\n"
+    "- Only one correct answer, must be present in question_options.\n"
+    "- Output valid JSON, parsable by json.loads. No text outside JSON.\n\n"
+    "Transcript:\n"
+)
+
+
 def download_audio(url):
     """Download the audio of a YouTube video and return the file path."""
     temp_dir = tempfile.gettempdir()
@@ -49,22 +67,7 @@ def generate_quiz_from_transcript(transcript):
 
 def _build_prompt(transcript):
     """Build the prompt for quiz generation from the transcript."""
-    return (
-        "Based on the following transcript, generate a quiz in valid JSON "
-        "format. The quiz must follow this exact structure:\n"
-        '{"title": "A concise quiz title based on the transcript topic.", '
-        '"description": "Summarize the transcript in max 150 characters. '
-        'No quiz questions or answers.", '
-        '"questions": [{"question_title": "The question.", '
-        '"question_options": ["Option A", "Option B", "Option C", "Option D"], '
-        '"answer": "The correct option, exactly matching one of the options"}]}\n'
-        "Requirements:\n"
-        "- Exactly 10 questions.\n"
-        "- Each question has exactly 4 distinct options.\n"
-        "- Only one correct answer, must be present in question_options.\n"
-        "- Output valid JSON, parsable by json.loads. No text outside JSON.\n\n"
-        "Transcript:\n" + transcript
-    )
+    return _QUIZ_PROMPT_TEMPLATE + transcript
 
 
 def _parse_quiz_json(raw_text):

@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.conf import settings
 from rest_framework_simplejwt.exceptions import TokenError
 
 from .serializers import RegisterSerializer, LoginSerializer
+from .utils import set_token_cookie, blacklist_token
 
 
 class RegisterView(APIView):
@@ -43,20 +43,8 @@ class LoginView(APIView):
 
     def _set_auth_cookies(self, response, access, refresh):
         """Write the access and refresh tokens as HttpOnly cookies."""
-        response.set_cookie(
-            key='access_token',
-            value=str(access),
-            httponly=settings.COOKIE_HTTPONLY,
-            secure=settings.COOKIE_SECURE,
-            samesite=settings.COOKIE_SAMESITE,
-        )
-        response.set_cookie(
-            key='refresh_token',
-            value=str(refresh),
-            httponly=settings.COOKIE_HTTPONLY,
-            secure=settings.COOKIE_SECURE,
-            samesite=settings.COOKIE_SAMESITE,
-        )
+        set_token_cookie(response, 'access_token', access)
+        set_token_cookie(response, 'refresh_token', refresh)
 
 
 class LogoutView(APIView):
@@ -65,14 +53,7 @@ class LogoutView(APIView):
 
     def post(self, request):
         """Invalidate the refresh token and remove the auth cookies."""
-        refresh_token = request.COOKIES.get('refresh_token')
-        if refresh_token:
-            try:
-                token = RefreshToken(refresh_token)
-                token.blacklist()
-            except TokenError:
-                pass
-
+        blacklist_token(request.COOKIES.get('refresh_token'))
         response = Response(
             {"detail": "Log-Out successfully! All Tokens will be deleted. "
                        "Refresh token is now invalid."},
@@ -92,28 +73,13 @@ class CookieTokenRefreshView(APIView):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
             return Response(
-                {"detail": "Refresh token not found."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
+                {"detail": "Refresh token not found."}, status=status.HTTP_401_UNAUTHORIZED)
         try:
-            token = RefreshToken(refresh_token)
-            access_token = token.access_token
+            access_token = RefreshToken(refresh_token).access_token
         except TokenError:
             return Response(
-                {"detail": "Refresh token invalid."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        response = Response(
-            {"detail": "Token refreshed"},
-            status=status.HTTP_200_OK,
-        )
-        response.set_cookie(
-            key='access_token',
-            value=str(access_token),
-            httponly=settings.COOKIE_HTTPONLY,
-            secure=settings.COOKIE_SECURE,
-            samesite=settings.COOKIE_SAMESITE,
-        )
+                {"detail": "Refresh token invalid."}, status=status.HTTP_401_UNAUTHORIZED)
+        response = Response({"detail": "Token refreshed"},
+                            status=status.HTTP_200_OK)
+        set_token_cookie(response, 'access_token', access_token)
         return response
