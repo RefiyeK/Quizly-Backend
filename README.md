@@ -15,7 +15,7 @@ is a separate repository (see [Frontend](#frontend)).
 
 ## Tech Stack
 
-- **Python 3.14** (developed and tested on 3.14.3)
+- **Python 3.12+** (developed and tested on 3.14.3)
 - Django 5.2 & Django REST Framework
 - djangorestframework-simplejwt (JWT authentication)
 - django-cors-headers
@@ -23,110 +23,174 @@ is a separate repository (see [Frontend](#frontend)).
 - openai-whisper (speech-to-text transcription)
 - google-genai (Gemini – quiz generation)
 
+---
+
 ## System Requirements
 
-Before installing the Python packages, the following tools must be installed
-**globally** on your system:
+Three tools must be installed **globally** on your system before the Python
+packages. Each has a copy-paste command and a verification command below.
 
-### FFMPEG (required)
+### 1. Python 3.12+
 
-Whisper requires FFMPEG to process audio. It must be installed globally and be
-available on the system PATH.
+Check whether Python is already installed:
+
+```
+python --version
+```
+
+If it prints `Python 3.12` or higher, you are set. Otherwise install it:
+
+- **Windows:** `winget install --id Python.Python.3.12 -e --source winget`
+- **macOS:** `brew install python@3.12`
+- **Linux (Debian/Ubuntu):** `sudo apt update && sudo apt install -y python3 python3-venv python3-pip`
+
+### 2. FFMPEG
+
+Whisper requires FFMPEG to process audio. Install it globally:
 
 - **Windows:** `winget install --id Gyan.FFmpeg -e --source winget`
 - **macOS:** `brew install ffmpeg`
+- **Linux (Debian/Ubuntu):** `sudo apt update && sudo apt install -y ffmpeg`
 
-Verify the installation:
+Verify:
 
 ```
 ffmpeg -version
 ```
 
-### Deno (required for yt-dlp)
+### 3. Deno (required by yt-dlp)
 
 Since 2026, yt-dlp needs an external JavaScript runtime to download from
-YouTube. Deno is the recommended runtime and must be installed globally.
+YouTube. Deno is the recommended runtime and must be installed globally:
 
-- See: https://deno.com
+- **Windows:** `winget install --id DenoLand.Deno -e --source winget`
+- **macOS:** `brew install deno`
+- **Linux:** `curl -fsSL https://deno.land/install.sh | sh`
 
-Verify the installation:
+Verify:
 
 ```
 deno --version
 ```
 
+> **Windows note:** after `winget install`, close and reopen your terminal so
+> that the new tools are available on the PATH.
+
+---
+
 ## Installation
 
-1. **Clone the repository**
+### 1. Clone the repository
 
-   ```
-   git clone https://github.com/RefiyeK/Quizly-Backend.git
-   cd Quizly-Backend
-   ```
+```
+git clone https://github.com/RefiyeK/Quizly-Backend.git
+cd Quizly-Backend
+```
 
-2. **Create and activate a virtual environment**
+### 2. Create and activate a virtual environment
 
-   Windows (PowerShell):
+**Windows (PowerShell):**
 
-   ```
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-   ```
+```
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
 
-   macOS / Linux:
+**macOS / Linux:**
 
-   ```
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
+```
+python3 -m venv venv
+source venv/bin/activate
+```
 
-3. **Install the dependencies**
+> If PowerShell blocks the activation script, run this once, then activate
+> again:
+> `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
 
-   ```
-   pip install -r requirements.txt
-   ```
+### 3. Install the dependencies
 
-4. **Create the `.env` file**
+```
+pip install -r requirements.txt
+```
 
-   Copy `.env.template` to `.env` and fill in your own values:
+### 4. Create the `.env` file
 
-   ```
-   SECRET_KEY=your-django-secret-key
-   GEMINI_API_KEY=your-gemini-api-key
-   ```
+The project reads its secrets from a `.env` file. Create it by copying the
+template:
 
-   A free Gemini API key can be created at https://ai.google.dev/.
+**Windows (PowerShell):**
 
-5. **Run the database migrations**
+```
+Copy-Item .env.template .env
+```
 
-   ```
-   python manage.py migrate
-   ```
+**macOS / Linux:**
 
-6. **Create a superuser** (to access the admin panel)
+```
+cp .env.template .env
+```
 
-   ```
-   python manage.py createsuperuser
-   ```
+Now open `.env` and fill in the two values:
 
-7. **Start the development server**
+```
+SECRET_KEY=your-django-secret-key
+GEMINI_API_KEY=your-gemini-api-key
+```
 
-   ```
-   python manage.py runserver
-   ```
+**Generate a Django `SECRET_KEY`** (run this and paste the output as the value):
 
-   The API is now available at `http://127.0.0.1:8000/api/`.
+```
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+**Get a free `GEMINI_API_KEY`** at https://ai.google.dev/ → "Get API key".
+
+### 5. Run the database migrations
+
+```
+python manage.py migrate
+```
+
+### 6. Create a superuser (for the admin panel)
+
+```
+python manage.py createsuperuser
+```
+
+### 7. Start the development server
+
+```
+python manage.py runserver
+```
+
+The API is now available at `http://127.0.0.1:8000/api/`.
+
+---
 
 ## Frontend
 
 The frontend is a separate repository and is required to use the application
-through the browser. Fork or clone it from:
+through the browser.
 
-- https://github.com/RefiyeK/project.Quizly
+### 1. Clone the frontend
 
-Run the frontend with a static server (e.g. the VS Code **Live Server**
-extension) on `http://127.0.0.1:5500`. The backend is preconfigured to allow
-this origin (CORS).
+```
+git clone https://github.com/RefiyeK/project.Quizly.git
+```
+
+### 2. Serve it on port 5500
+
+Open the frontend folder in VS Code and start it with the **Live Server**
+extension (bottom-right "Go Live"). It must run on `http://127.0.0.1:5500`.
+
+No configuration is needed: the frontend's `config.js` already points to the
+backend at `http://127.0.0.1:8000/api/`, and the backend already allows the
+`http://127.0.0.1:5500` origin (CORS).
+
+> Open the app at **http://127.0.0.1:5500** (not `localhost:5500`). The two are
+> different origins for cookies; the backend is configured for `127.0.0.1`.
+
+---
 
 ## API Endpoints
 
